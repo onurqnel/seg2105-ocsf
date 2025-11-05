@@ -26,7 +26,17 @@ public class ChatClient extends AbstractClient {
             this.clientUI.display("Could not send message to server.  Terminating client.");
             this.quit();
         }
+    }
 
+    @Override
+    protected void connectionClosed() {
+        clientUI.display("Connection closed.");
+    }
+
+    @Override
+    protected void connectionException(Exception exception) {
+        clientUI.display("Server has been shut down.");
+        this.quit();
     }
 
     public void quit() {
