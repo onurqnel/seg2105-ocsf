@@ -37,6 +37,16 @@ public class EchoServer extends AbstractServer {
         this.sendToAllClients(msg);
     }
 
+    @Override
+    protected void clientConnected(ConnectionToClient client) {
+        System.out.println("Client connected.");
+    }
+
+    @Override
+    protected synchronized void clientDisconnected(ConnectionToClient client) {
+        System.out.println("Client disconnected.");
+    }
+
     protected void serverStarted() {
         System.out.println("Server listening for connections on port " + this.getPort());
     }
