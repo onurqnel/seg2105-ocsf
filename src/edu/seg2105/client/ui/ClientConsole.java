@@ -24,14 +24,19 @@ public class ClientConsole implements ChatIF {
 
     public static void main(String[] args) {
         String host = "";
+        int port = 0;
 
         try {
             host = args[0];
-        } catch (ArrayIndexOutOfBoundsException var3) {
+            port = Integer.parseInt(args[1]);
+        } catch (ArrayIndexOutOfBoundsException e) {
             host = "localhost";
+            port = DEFAULT_PORT;
+        } catch (NumberFormatException e) {
+            port = DEFAULT_PORT;
         }
 
-        ClientConsole chat = new ClientConsole(host, 5555);
+        ClientConsole chat = new ClientConsole(host, port);
         chat.accept();
     }
 
