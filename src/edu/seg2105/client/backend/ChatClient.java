@@ -8,12 +8,14 @@ import java.util.Scanner;
 
 
 public class ChatClient extends AbstractClient {
-    ChatIF clientUI;
 
-    public ChatClient(String host, int port, ChatIF clientUI) throws IOException {
+    ChatIF clientUI;
+    int loginId;
+
+    public ChatClient(int loginId, String host, int port, ChatIF clientUI) throws IOException {
         super(host, port);
+        this.loginId = loginId;
         this.clientUI = clientUI;
-        this.openConnection();
     }
 
     public void handleMessageFromServer(Object message) {
@@ -26,8 +28,7 @@ public class ChatClient extends AbstractClient {
                 handleCommand(message);
             } else {
                 if (!isConnected()) {
-                    clientUI.display("Not connected. Use #login first.");
-                    return;
+                    openConnection();
                 }
                 sendToServer(message);
             }
@@ -81,14 +82,6 @@ public class ChatClient extends AbstractClient {
                     }
                 }
             }
-        } else if (cmd.equals("#login")) {
-            if (isConnected()) {
-                clientUI.display("Already connected to " + getHost() + " and port: " + getPort());
-            } else {
-                openConnection();
-                clientUI.display("Logged in to " + getHost() + ":" + getPort());
-            }
-
         } else if (cmd.equals("#gethost")) {
             clientUI.display("Current host: " + getHost());
 
@@ -100,6 +93,15 @@ public class ChatClient extends AbstractClient {
         }
     }
 
+    @Override
+    protected void connectionEstablished() {
+        try {
+            sendToServer("#login " + loginId);
+        } catch (IOException e) {
+            clientUI.display("Error: Failed to send login id to server.");
+            quit();
+        }
+    }
 
     @Override
     protected void connectionClosed() {
