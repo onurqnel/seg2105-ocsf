@@ -5,28 +5,65 @@ import ocsf.server.AbstractServer;
 import ocsf.server.ConnectionToClient;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Scanner;
 
 public class EchoServer extends AbstractServer {
     ServerConsole serverConsole;
 
     public EchoServer(int port) {
+
         super(port);
     }
 
     public void setServerConsole(ServerConsole console) {
+
         this.serverConsole = console;
     }
 
 
     @Override
     public void handleMessageFromClient(Object msg, ConnectionToClient client) {
-        PrintStream var10000 = System.out;
-        String var10001 = String.valueOf(msg);
-        var10000.println("Message received: " + var10001 + " from " + client);
-        this.sendToAllClients(msg);
+        String s = String.valueOf(msg).trim();
+        String loginId = (String) client.getInfo("loginId");
+
+        Scanner scanner = new Scanner(s);
+        String command;
+
+        if (scanner.hasNext()) {
+            command = scanner.next();
+        } else {
+            command = "";
+        }
+
+        if (loginId == null) {
+            if (command.equals("#login") && scanner.hasNext()) {
+                String id = scanner.next().trim();
+                client.setInfo("loginId", id);
+                return;
+            }
+
+            try {
+                client.sendToClient("You must login first using '#login <loginId>'");
+                client.close();
+            } catch (IOException e) {
+                System.err.println("Connection error: " + e.getMessage());
+            }
+            return;
+        }
+
+        if (command.equals("#login")) {
+            try {
+                client.sendToClient("#login only allowed at initial connection");
+                client.close();
+            } catch (IOException e) {
+                System.err.println("Connection error: " + e.getMessage());
+            }
+            return;
+        }
+
+        sendToAllClients(loginId + ": " + s);
     }
+
 
     public void handleMessageFromServer(String message) throws IOException {
         try {
