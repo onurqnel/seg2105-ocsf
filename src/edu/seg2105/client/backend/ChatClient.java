@@ -16,8 +16,8 @@ public class ChatClient extends AbstractClient {
         this.openConnection();
     }
 
-    public void handleMessageFromServer(Object msg) {
-        this.clientUI.display(msg.toString());
+    public void handleMessageFromServer(Object message) {
+        clientUI.display(message.toString());
     }
 
     public void handleMessageFromClientUI(String message) {
@@ -25,15 +25,15 @@ public class ChatClient extends AbstractClient {
             if (message.startsWith("#")) {
                 handleCommand(message);
             } else {
-                if (!this.isConnected()) {
-                    this.clientUI.display("Not connected. Use #login first.");
+                if (!isConnected()) {
+                    clientUI.display("Not connected. Use #login first.");
                     return;
                 }
-                this.sendToServer(message);
+                sendToServer(message);
             }
-        } catch (IOException var3) {
-            this.clientUI.display("Could not send message to server.  Terminating client.");
-            this.quit();
+        } catch (IOException exception) {
+            clientUI.display("Error sending message: " + exception.getMessage());
+            quit();
         }
     }
 
@@ -43,16 +43,16 @@ public class ChatClient extends AbstractClient {
 
         if (cmd.equals("#quit")) {
             quit();
-
+            clientUI.display("Client logged off.");
         } else if (cmd.equals("#logoff")) {
-            if (this.isConnected()) {
+            if (isConnected()) {
                 closeConnection();
             } else {
                 clientUI.display("Already logged off.");
             }
 
         } else if (cmd.equals("#sethost")) {
-            if (this.isConnected()) {
+            if (isConnected()) {
                 clientUI.display("You must log off before changing host.");
             } else {
                 if (!input.hasNext()) {
@@ -65,7 +65,7 @@ public class ChatClient extends AbstractClient {
             }
 
         } else if (cmd.equals("#setport")) {
-            if (this.isConnected()) {
+            if (isConnected()) {
                 clientUI.display("You must log off before changing port.");
             } else {
                 if (!input.hasNext()) {
@@ -82,7 +82,7 @@ public class ChatClient extends AbstractClient {
                 }
             }
         } else if (cmd.equals("#login")) {
-            if (this.isConnected()) {
+            if (isConnected()) {
                 clientUI.display("Already connected to " + getHost() + " and port: " + getPort());
             } else {
                 openConnection();
@@ -109,15 +109,14 @@ public class ChatClient extends AbstractClient {
     @Override
     protected void connectionException(Exception exception) {
         clientUI.display("Server has been shut down.");
-        this.quit();
+        quit();
     }
 
     public void quit() {
         try {
-            this.closeConnection();
-        } catch (IOException var2) {
+            closeConnection();
+        } catch (IOException exception) {
         }
-
         System.exit(0);
     }
 }
